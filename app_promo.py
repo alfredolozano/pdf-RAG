@@ -79,6 +79,7 @@ def build_rag_chain(retriever):
                                 Apartado: "{context_str}"
                                 ---
                                 Dado el nuevo apartado, complementa o corrige la respuesta encontrada (solo si es preciso y necesario) con este contexto adicional.
+                                No ólvides referenciar, en orden, todas las páginas relevantes.
                                 El usuario no sabe que estas haciendo este paso, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original.
                                 ''')
 
