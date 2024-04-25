@@ -264,8 +264,11 @@ def process_pdf(file_path, table_model):
                     cropped_image = page_image.copy().crop((box[0], box[1], box[2], box[3]))
                     ocr_section = ocr_image(cropped_image)
 
+                    if not ocr_section[0]:
+                        continue
                     ## process table
-                    chunks.append(ocr_to_markdown_advanced(ocr_section[0]))
+                    else: 
+                        chunks.append(ocr_to_markdown_advanced(ocr_section[0]))
 
                 if object_box[1] in [2,4]:  # process text content
                     text_content = get_ocr_data_in_box(ocr_result, object_box)
