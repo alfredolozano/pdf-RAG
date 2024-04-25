@@ -134,6 +134,7 @@ def analyze_query(user_question):
 def get_promo_answer(user_question):
     messages = [
         ("system", f'''Eres un asistente de inteligencia artificial experto en promocionales de seguros Afirme.
+                       IMPORTANTE: tu respuesta debe escapar (\) caracteres con efectos de formato markdown.
                        Dada una pregunta de un usuario sobre una promoción de seguros de mascotas, debes recomendar que el usuario hable con su agente de seguros Afirme para adquirir la siguiente promoción de seguros de mascotas:
                        
         SEGURO MASCOTA
