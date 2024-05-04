@@ -1,6 +1,6 @@
 import streamlit as st
 from dotenv import load_dotenv
-from PyPDF2 import PdfReader
+# from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from langchain_community.embeddings import CohereEmbeddings
@@ -21,6 +21,10 @@ from langchain.llms import OpenAI
 
 from pdf_ocr import *
 
+# st.set_page_config(page_title="Agente conversacional", page_icon="app/static/logo.jpg")
+# st.markdown(css, unsafe_allow_html=True)
+
+history_chat = "history_chat"
 
 def chunk_docs(list_of_pages):
     all_text = ''
@@ -64,6 +68,8 @@ def build_rag_chain(retriever):
                                      Mantén la respuesta lo más precisa posible.
                                      Apartado: "{context_str}"
                                      Pregunta: "{question}"
+
+                                     IMPORTANTE: tu respuesta debe escapar (\) caracteres con efectos de formato markdown.
                                      ''')
 
 
@@ -79,8 +85,9 @@ def build_rag_chain(retriever):
                                 Apartado: "{context_str}"
                                 ---
                                 Dado el nuevo apartado, complementa o corrige la respuesta encontrada (solo si es preciso y necesario) con este contexto adicional.
-                                No ólvides referenciar, en orden, todas las páginas relevantes.
-                                El usuario no sabe que estas haciendo este paso, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original.
+                                No olvides referenciar, en orden, todas las páginas relevantes.
+                                IMPORTANTE: tu respuesta debe escapar (\) caracteres con efectos de formato markdown.
+                                El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.
                                 ''')
 
     qa_chain = RetrievalQA.from_chain_type(llm = llm,
@@ -101,28 +108,17 @@ def analyze_query(user_question):
     messages = [
         ("system", f'''Eres un asistente de inteligencia artificial experto en analizar consultas de usuario.
                        Dada una pregunta de un usuario, debes responder únicamente:
-                        - True: si el usuario pregunta su póliza de seguros del usuario.
-                        - False: si la pregunta es una consulta sobre contratar una nueva póliza de seguros.
-                        
-                       La respuesta a la pregunta debe conter únicamente la palabra "True" o la palabra "False".
-                       
-        --Ejemplos de preguntas que debes responder con "True":
+                        - True: si el usuario pregunta exclusivamente sobre promociones o seguro de mascotas.
+                        - False: en cualquier caso contrario.
 
-        De cuanto es mi prima asegurada?
-        Cuanto es mi recargo financiero?
-        Cuanto es la prima total?
-        Cual es la vigencia de la poliza?
-        Cual es mi condición de pago?
-        ¿Cuál es la cobertura que brinda la póliza de Responsabilidad Civil de Auto?
-        ¿Cuales son los gastos de expedición?
-        ¿Cuál es la cobertura por robo de piezas o accesorios de la póliza y cuáles son las limitaciones?
-        Cual es la cobertura de Gastos medicos ocupantes?
-        ¿Cuáles son los límites mínimos de responsabilidad por lesiones corporales y daños a la propiedad requeridos en EE. UU. y Canadá?
-        Cuál es valor d la cobertura por muerte del titular?
-        Cual es la cobertura de daños a terceros?
-        ¿Cuáles son las condiciones para que esté vigente la póliza de Responsabilidad Civil de Autos?
-        ¿Qué riesgos y bienes están asegurados por Chubb Seguros México, S.A.?
-                       
+                       Es muy importate que identifiques cuando el usuario quiere información sobre un nuevo seguro de mascoras, cualquier pregunta que no esté estrictamente relacionada a un seguro de mascotas debe ser respondida como "False".
+
+                       Ejemplos de preguntas con respuesta "True":
+                       1. me puedes compartir información sobre un seguro de mascotas?
+                       2. me gustaría obtener información sobre un seguro de mascotas
+                       3. quiero obtener información sobre un seguro de mascotas
+
+                       La respuesta a la pregunta debe conter únicamente la palabra "True" o la palabra "False".
                        '''),
         ("human", user_question),
     ]
@@ -137,7 +133,7 @@ def get_promo_answer(user_question):
         ("system", f'''Eres un asistente de inteligencia artificial experto en promocionales de seguros Afirme.
                        IMPORTANTE: tu respuesta debe escapar (\) caracteres con efectos de formato markdown.
                        Dada una pregunta de un usuario sobre una promoción de seguros de mascotas, debes recomendar que el usuario hable con su agente de seguros Afirme para adquirir la siguiente promoción de seguros de mascotas:
-                       
+
         SEGURO MASCOTA
         ¡Esta es una promoción exclusiva para ti!
 
@@ -177,49 +173,34 @@ def get_promo_answer(user_question):
     return generated_text
 
 
-def handle_userinput(user_question, conversation_chain):
-    is_insurance_query = analyze_query(user_question)
+def write_chat(history):
+    for qa in history:
+        question = qa["question"]
+        answer  = qa["answer"]
+        st.write(user_template.replace("{{MSG}}", question), unsafe_allow_html=True)
+        st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
 
-    if is_insurance_query:
+
+def handle_userinput(user_question, conversation_chain):
+    is_pet_query = analyze_query(user_question)
+
+    if not is_pet_query:
         response = conversation_chain({'query': user_question})
         answer = response["result"]
+        if answer[0] == '"' and answer[-1] == '"': answer = answer[1:-1]
     else:
         answer = get_promo_answer(user_question)
+    st.session_state[history_chat].append({"answer": answer, "question": user_question})
+    write_chat(st.session_state[history_chat])
 
-    st.write(user_template.replace("{{MSG}}", user_question), unsafe_allow_html=True)
-    st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
 
 
-def main():
-    load_dotenv()
-    st.set_page_config(page_title="RAGente de póliza", page_icon=":books:")
-    st.write(css, unsafe_allow_html=True)
-
-    if "conversation_chain" not in st.session_state:
-        st.session_state.conversation_chain = None
-
-    st.header("RAGente de póliza :books:")
-    user_question = st.text_input("Haz una consulta sobre tu póliza:")
-
+def process_documents():
     with st.sidebar:
-        st.subheader("Carga de documentos")
-        pdf_docs = st.file_uploader("Sube tu póliza en PDF aquí y da click en 'Procesar'", accept_multiple_files=True)
-        if st.button("Procesar"):
+        if 'pdf_docs' in st.session_state and st.session_state.pdf_docs:
             with st.spinner("Procesando documentos"):
-                raw_text = process_pdf(pdf_docs[0], table_model)
-                # text_chunks = chunk_docs(raw_text)
+                raw_text = process_pdf(st.session_state.pdf_docs[0], table_model)
                 text_chunks = get_text_chunks(raw_text) ## use this for whole page context
-
-                # embeddings = CohereEmbeddings(model="embed-multilingual-light-v3.0")
-
-                # embeddings = OpenAIEmbeddings()
-
-                # retriever = FAISS.from_texts(texts=text_chunks, embedding=embeddings)\
-                #                 .as_retriever(search_type="similarity_score_threshold",
-                #                             search_kwargs={"score_threshold": 0.65, "k": 3})
-
-
-                # initialize the bm25 retriever and faiss retriever
                 bm25_retriever = BM25Retriever.from_texts(
                     text_chunks
                 )
@@ -231,13 +212,31 @@ def main():
                 )
                 faiss_retriever = faiss_vectorstore.as_retriever(search_type="similarity_score_threshold",
                                                                 search_kwargs={"score_threshold": 0.65, "k": 2})
-
-                # initialize the ensemble retriever
                 retriever = EnsembleRetriever(
                     retrievers=[bm25_retriever, faiss_retriever], weights=[0.50, 0.50]
                 )
-
                 st.session_state.conversation_chain = build_rag_chain(retriever)
+                st.markdown(css, unsafe_allow_html=True)
+
+
+def main():
+    load_dotenv()
+    st.set_page_config(page_title="Agente conversacional", page_icon="app/static/logo.jpg")
+    st.markdown(css, unsafe_allow_html=True)
+
+    if "conversation_chain" not in st.session_state:
+        st.session_state.conversation_chain = None
+
+    if history_chat not in st.session_state:
+        st.session_state[history_chat] = []
+
+    st.header("¡Hola! Bienvenido a AFIRME ChatBot, estoy aquí para ayudarte a resolver cualquier duda que tengas sobre alguna de tus pólizas. Pregunta también por nuestras promociones")
+    user_question = st.text_input("Haz una consulta sobre tu póliza")
+
+    with st.sidebar:
+        st.subheader("Carga de documentos")
+        st.file_uploader("Sube tu póliza en PDF aquí", accept_multiple_files=True, on_change=process_documents, key="pdf_docs")
+
 
     if user_question and st.session_state.conversation_chain:
         handle_userinput(user_question, st.session_state.conversation_chain)
