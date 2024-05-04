@@ -53,7 +53,7 @@ css = '''
     header[data-testid="stHeader"] {
         display: none;
     }
-    
+
     [data-testid="stSidebar"]::before {
         content: "";
         display: block;
@@ -66,7 +66,7 @@ css = '''
     [data-testid="stSidebar"] {
         top: 25px;
         left: 25px;
-        height: calc(100% - 60px) !important; 
+        height: calc(100% - 60px) !important;
         border-radius: 10px;
         background: white;
     }
@@ -76,7 +76,7 @@ css = '''
         top: 25px;
         left: 27%;
         right: 35px;
-        height: calc(100% - 60px) !important; 
+        height: calc(100% - 60px) !important;
         background: white;
         max-width:initial;
         width: initial;
@@ -201,6 +201,6 @@ user_template = '''
     <div class="message">{{MSG}}</div>
     <div class="avatar">
         <img src="app/static/human_avatar.jpg">
-    </div>    
+    </div>
 </div>
 '''
