@@ -53,7 +53,7 @@ css = '''
     header[data-testid="stHeader"] {
         display: none;
     }
-
+    
     [data-testid="stSidebar"]::before {
         content: "";
         display: block;
@@ -66,7 +66,7 @@ css = '''
     [data-testid="stSidebar"] {
         top: 25px;
         left: 25px;
-        height: calc(100% - 60px) !important;
+        height: calc(100% - 60px) !important; 
         border-radius: 10px;
         background: white;
     }
@@ -74,17 +74,30 @@ css = '''
     [data-testid="stSidebar"] + section > div:first-child{
         position: absolute !important;
         top: 25px;
-        left: 27%;
+        left: 386px;
         right: 35px;
-        height: calc(100% - 60px) !important;
+        height: calc(100% - 60px) !important; 
         background: white;
         max-width:initial;
         width: initial;
         border-radius: 10px;
+        padding: 3rem 1rem 6rem;
     }
 
     [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] {
         position: static;
+        max-height: 75vh;
+        overflow-y: scroll;
+        overflow-x: visible;
+        width: max-content;
+    }
+
+    [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] > div  [data-testid="stMarkdownContainer"]{
+        margin-bottom: 0px;
+    }
+
+    [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] > div:nth-child(2) [data-testid="stMarkdownContainer"] h2  {
+        padding: 0px;
     }
 
     [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] > div:nth-child(2) [data-testid="stMarkdownContainer"] h2 span {
@@ -96,10 +109,6 @@ css = '''
         border: 0.5px solid #49454F80;
         padding: 8px;
         border-radius: 8px;
-    }
-
-    [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] > div {
-        min-height: 43.594px;
     }
 
     [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] > div:nth-child(3) {
@@ -165,7 +174,6 @@ css = '''
         width: 106px;
         background: white;
         color: #06983E;
-
     }
 
     section[data-testid="stFileUploadDropzone"] button[kind="secondary"] {
@@ -201,6 +209,6 @@ user_template = '''
     <div class="message">{{MSG}}</div>
     <div class="avatar">
         <img src="app/static/human_avatar.jpg">
-    </div>
+    </div>    
 </div>
 '''
