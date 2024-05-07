@@ -69,7 +69,6 @@ def ocr_image(image):
     result = ocr_model.ocr(image_data)
     return result
 
-
 def ocr_to_markdown_advanced(ocr_section_input, y_threshold=30):
     def get_vertical_center(box):
         return int((box[0][1] + box[2][1]) / 2)
@@ -239,50 +238,40 @@ def avg_coordinate(coords, index):
 def rounded_avg_y_coordinate(coords, y_tolerance = 50):
     return round(avg_coordinate(coords, 1) / y_tolerance) * y_tolerance
 
+### all together
 
 def process_pdf(file_path, table_model):
     text_results = []
 
     with pdfplumber.open(file_path) as pdf:
         for page in pdf.pages:
+            page_image = page.to_image(resolution=300).original  # Convert once
+            image_bytes = io.BytesIO()
+            page_image.save(image_bytes, format='JPEG')
+            image_bytes.seek(0)
+            image_data = image_bytes.read()
+
+            ocr_result = ocr_model.ocr(image_data)  # Use the image data
+            content_boxes = detect_tables_and_content(page_image, table_model)
 
             chunks = []
-
-            page_image = page.to_image(resolution=300).original
-            ocr_result = ocr_page(page)
-
-            content_boxes = detect_tables_and_content(page_image, table_model)
-            content_boxes.sort(key=lambda x: (int((x[0][1])/50)*50, x[0][0]))
-
-
             for object_box in content_boxes:
-                # check object detection class
-
-                if object_box[1] in [0,1]:  # process table content
+                if object_box[1] in [0, 1]:  # Table content
                     box = object_box[0]
-                    ## crop image to box
-                    cropped_image = page_image.copy().crop((box[0], box[1], box[2], box[3]))
+                    cropped_image = page_image.crop((box[0], box[1], box[2], box[3]))
                     ocr_section = ocr_image(cropped_image)
-
-                    if not ocr_section[0]:
-                        continue
-                    ## process table
-                    else: 
+                    if ocr_section[0]:
                         chunks.append(ocr_to_markdown_advanced(ocr_section[0]))
-
-                if object_box[1] in [2,4]:  # process text content
+                elif object_box[1] in [2, 4]:  # Text content
                     text_content = get_ocr_data_in_box(ocr_result, object_box)
-                    if text_content: 
+                    if text_content:
                         chunks.append(process_reading_order(text_content))
-        
-            # normalize and append content to page chunks
-            chunks = list(map(normalize_accents,chunks))
-            chunks = list(map(drop_divisions,chunks))
 
-            if chunks not in text_results: # maneja esa página duplicada
+            # Normalize and append content to page chunks
+            chunks = [normalize_accents(drop_divisions(chunk)) for chunk in chunks]
+            if chunks not in text_results:
                 text_results.append(chunks)
 
     return text_results
 
-
-# process_pdf('/content/DOC-20230901-WA0017_230916_085403.pdf', table_model)
+#process_pdf('/content/DOC-20230901-WA0017_230916_085403.pdf', table_model)
