@@ -15,7 +15,7 @@ file_path = '/content/DOC-20230901-WA0017_230916_085403.pdf'
 ocr_model = PaddleOCR(lang="es", use_gpu=True)  # 'es' for Spanish
 
 # load model
-device: str = "mps" if torch.backends.mps.is_available() else "cpu"
+device: str = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 table_model = YOLO('/content/drive/MyDrive/AFIRME - RAGente de Poliza/v4_mult/train/weights/last.pt')
 table_model.to(device)
