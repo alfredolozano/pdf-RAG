@@ -182,9 +182,9 @@ def write_chat(history):
 
 def escape_dollar_signs(text):
     # Split the text by '\$', check parts that need escaping
-    parts = text.split('\\$')
+    parts = text.split('\$')
     # Rejoin parts escaping unescaped dollar signs
-    escaped_text = '\\$'.join(part.replace('$', '\\$') for part in parts)
+    escaped_text = '\$'.join(part.replace('$', '\$') for part in parts)
     return escaped_text
 
 def handle_userinput(user_question, conversation_chain):
