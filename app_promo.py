@@ -181,26 +181,12 @@ def write_chat(history):
         st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
 
 def escape_dollar_signs(text):
-    # We'll use a list to build the new string for efficiency
-    escaped_text = []
-    i = 0
-    while i < len(text):
-        if text[i] == '$':
-            # Check if this $ is already escaped
-            if i > 0 and text[i-1] == '\\':
-                # It's already escaped, just add $ to the result
-                escaped_text.append('$')
-            else:
-                # It's not escaped, add escaped $
-                escaped_text.append('\\$')
-        else:
-            # Add the current character to the result
-            escaped_text.append(text[i])
-        i += 1
+    return text.replace(' $', '\$')
 
-    return ''.join(escaped_text)
-
+import time
 def handle_userinput(user_question, conversation_chain):
+    start_time = time.time()
+
     is_pet_query = analyze_query(user_question)
 
     if not is_pet_query:
@@ -212,10 +198,13 @@ def handle_userinput(user_question, conversation_chain):
 
     # Escape dollar signs in the answer
     escaped_answer = escape_dollar_signs(answer)
+    elapsed_time = time.time() - start_time
+
+    print(f"Escaped Answer: {escaped_answer}")
+    print(f"Time to process: {elapsed_time} seconds")
 
     st.session_state[history_chat].append({"answer": escaped_answer, "question": user_question})
     write_chat(st.session_state[history_chat])
-
 
 def process_documents():
     with st.sidebar:
