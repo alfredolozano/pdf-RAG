@@ -65,12 +65,12 @@ def build_rag_chain(retriever):
                                      template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
                                      Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta.
                                      La respuesta a la pregunta puede estar contenida en una tabla,
-                                     Mantén la respuesta lo más precisa posible.
+                                     Mantén la respuesta lo más clara y precisa posible.
                                      Apartado: "{context_str}"
-                                     Pregunta: "{question}"
 
-                                     IMPORTANTE: tu respuesta debe escapar (\) caracteres con efectos de formato markdown.
-                                     ''')
+                                     Pregunta: "{question}"
+                                     '''
+                                     )
 
 
 
@@ -78,17 +78,25 @@ def build_rag_chain(retriever):
                                 template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
                                 Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta.
                                 La pregunta original es: "{question}"
+                                
                                 Esta es una respuesta generada previamente: "{existing_answer}"
-                                * Importante: Si la respuesta encontrada es precisa devuelve unicamente la respuesta encontrada.
+                                
+                                * Importante: Si la respuesta encontrada es precisa devuelve unicamente la respuesta encontrada sin agregar información.
                                 Existe la posibilidad de que esta respuesta sea más precisa si se agrega informacion del siguiente apartado de la póliza:
+                                
                                 ---
                                 Apartado: "{context_str}"
                                 ---
+                                
                                 Dado el nuevo apartado, complementa o corrige la respuesta encontrada (solo si es preciso y necesario) con este contexto adicional.
                                 No olvides referenciar, en orden, todas las páginas relevantes.
-                                IMPORTANTE: tu respuesta debe escapar (\) caracteres con efectos de formato markdown.
-                                El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.
-                                ''')
+
+                                Para pólizas con cobertura en México y el extrangero, prioriza la información válida en México.
+
+                                La respuesta debe optimizar la experiencia del usuario con elementos de sintaxis como listas, bullets y salto de línea.
+
+                                El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.'''
+                                )
 
     qa_chain = RetrievalQA.from_chain_type(llm = llm,
                                     chain_type = "refine",
@@ -147,13 +155,13 @@ def get_promo_answer(user_question):
         Hospedaje de la Mascota en caso de hospitalización del propietario
         Servicios de asistencia incluidos:
 
-        Vacuna antirrábica o desparasitación
-        Consulta de valoración
-        Asistencia veterinaria telefónica
-        Asistencia legal
-        Orientación telefónica para el transporte de mascotas vía aérea
-        Concierge mascota
-        Precio anual: $900
+        - Vacuna antirrábica o desparasitación
+        - Consulta de valoración
+        - Asistencia veterinaria telefónica
+        - Asistencia legal
+        - Orientación telefónica para el transporte de mascotas vía aérea
+        - Concierge mascota
+        - Precio anual: $900
 
         ¡Aprovecha esta promoción! Adquiérelo en este momento.
 
@@ -181,7 +189,7 @@ def write_chat(history):
         st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
 
 def escape_dollar_signs(text):
-    return text.replace(' $', '\$')
+    return text.replace('$', '&#36;')
 
 import time
 def handle_userinput(user_question, conversation_chain):
