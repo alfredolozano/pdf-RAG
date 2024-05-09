@@ -180,6 +180,12 @@ def write_chat(history):
         st.write(user_template.replace("{{MSG}}", question), unsafe_allow_html=True)
         st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
 
+def escape_dollar_signs(text):
+    # Split the text by '\$', check parts that need escaping
+    parts = text.split('\\$')
+    # Rejoin parts escaping unescaped dollar signs
+    escaped_text = '\\$'.join(part.replace('$', '\\$') for part in parts)
+    return escaped_text
 
 def handle_userinput(user_question, conversation_chain):
     is_pet_query = analyze_query(user_question)
@@ -190,9 +196,12 @@ def handle_userinput(user_question, conversation_chain):
         if answer[0] == '"' and answer[-1] == '"': answer = answer[1:-1]
     else:
         answer = get_promo_answer(user_question)
-    st.session_state[history_chat].append({"answer": answer, "question": user_question})
-    write_chat(st.session_state[history_chat])
 
+    # Escape dollar signs in the answer
+    escaped_answer = escape_dollar_signs(answer)
+
+    st.session_state[history_chat].append({"answer": escaped_answer, "question": user_question})
+    write_chat(st.session_state[history_chat])
 
 
 def process_documents():
