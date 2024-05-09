@@ -181,11 +181,24 @@ def write_chat(history):
         st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
 
 def escape_dollar_signs(text):
-    # Split the text by '\$', check parts that need escaping
-    parts = text.split('\$')
-    # Rejoin parts escaping unescaped dollar signs
-    escaped_text = '\$'.join(part.replace('$', '\$') for part in parts)
-    return escaped_text
+    # We'll use a list to build the new string for efficiency
+    escaped_text = []
+    i = 0
+    while i < len(text):
+        if text[i] == '$':
+            # Check if this $ is already escaped
+            if i > 0 and text[i-1] == '\\':
+                # It's already escaped, just add $ to the result
+                escaped_text.append('$')
+            else:
+                # It's not escaped, add escaped $
+                escaped_text.append('\\$')
+        else:
+            # Add the current character to the result
+            escaped_text.append(text[i])
+        i += 1
+
+    return ''.join(escaped_text)
 
 def handle_userinput(user_question, conversation_chain):
     is_pet_query = analyze_query(user_question)
