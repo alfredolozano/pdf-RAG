@@ -91,6 +91,10 @@ css = '''
         overflow-x: visible;
         width: max-content;
     }
+     [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] .stTextInput [data-testid="stMarkdownContainer"] {
+        display: none;
+    }
+
 
     [data-testid="stSidebar"] + section [data-testid="stVerticalBlock"] > div  [data-testid="stMarkdownContainer"]{
         margin-bottom: 0px;
@@ -176,6 +180,10 @@ css = '''
         color: #06983E;
     }
 
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div[data-stale="true"]:nth-child(n+3) {
+        display: none;
+    }
+
     section[data-testid="stFileUploadDropzone"] button[kind="secondary"] {
         position: absolute !important;
         bottom: 150px;
@@ -190,6 +198,23 @@ css = '''
         transform: translateX(-50%);
         background: linear-gradient(270deg, #0E7034 0%, #34AD6C 100%);
         color: white !important;
+        min-width: 20ch;
+    }
+
+    section[data-testid="stFileUploadDropzone"] button[kind="secondary"]:before {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        bottom:0;
+        right: 0;
+        background: linear-gradient(270deg, #0E7034 0%, #34AD6C 100%);
+        color: white !important;
+        content: "Carga tu póliza";
+        line-height: 32px;
+    }
+
+    footer {
+        display: none
     }
 
     </style>
