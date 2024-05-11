@@ -59,7 +59,7 @@ def build_rag_chain(retriever):
 ##https://js.langchain.com/docs/modules/chains/document/refine
 ##https://stackoverflow.com/questions/77521745/map-reduce-prompt-with-retrievalqa-chain
 
-    llm = ChatOpenAI(model='gpt-4', temperature=0)
+    llm = ChatOpenAI(model='gpt-4-turbo', temperature=0)
 
     question_prompt = PromptTemplate(input_variables=['question', 'context_str'],
                                      template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
@@ -91,11 +91,11 @@ def build_rag_chain(retriever):
                                 ---
                                 
                                 Instrucciones:
+                                - No debes agregar información que no esté relacionada a la pregunta.
                                 - Dado el nuevo apartado, complementa o corrige la respuesta previa (solo si es preciso y necesario) con este contexto adicional.
-                                - No debes agregar información que no esté referenciada en la pregunta.
-                                - No olvides referenciar, en orden, todas las páginas relevantes.
+                                - Utiliza elementos de sintaxis como listas, bullets y salto de línea para optimizar la experiencia de usuario.
+                                - Debes referenciar, en orden, todas las páginas relevantes.
                                 - Para pólizas con cobertura en México y el extranjero, prioriza la información válida en México.
-                                - La respuesta debe optimizar la experiencia del usuario con elementos de sintaxis como listas, bullets y salto de línea.
                                 - El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.'''
                                 )
 
