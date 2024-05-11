@@ -21,6 +21,17 @@ from langchain.llms import OpenAI
 
 from pdf_ocr import *
 
+
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Configure the language model for the application.")
+    parser.add_argument("--llm", type=str, default="gpt-4", help="Specify the language model to use. Default is 'gpt-4'.")
+    args = parser.parse_args()
+    return args.llm
+
+language_model = parse_arguments()
+
 # st.set_page_config(page_title="Agente conversacional", page_icon="app/static/logo.jpg")
 # st.markdown(css, unsafe_allow_html=True)
 
@@ -59,7 +70,7 @@ def build_rag_chain(retriever):
 ##https://js.langchain.com/docs/modules/chains/document/refine
 ##https://stackoverflow.com/questions/77521745/map-reduce-prompt-with-retrievalqa-chain
 
-    llm = ChatOpenAI(model='gpt-4-turbo', temperature=0)
+    llm = ChatOpenAI(model=language_model, temperature=0)
 
     question_prompt = PromptTemplate(input_variables=['question', 'context_str'],
                                      template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
