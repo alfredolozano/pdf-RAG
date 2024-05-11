@@ -77,25 +77,26 @@ def build_rag_chain(retriever):
     refine_prompt = PromptTemplate(input_variables=['question', 'existing_answer', 'context_str'],
                                 template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
                                 Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta.
+                                ---
                                 La pregunta original es: "{question}"
-                                
+                                ---
                                 Esta es una respuesta generada previamente: "{existing_answer}"
-                                
-                                * Importante: Si la respuesta encontrada es precisa devuelve unicamente la respuesta encontrada sin agregar información.
+                                ---
+
+                                * Importante: Si la respuesta previa es precisa devuelve unicamente la respuesta previa sin agregar información.
                                 Existe la posibilidad de que esta respuesta sea más precisa si se agrega informacion del siguiente apartado de la póliza:
                                 
                                 ---
                                 Apartado: "{context_str}"
                                 ---
                                 
-                                Dado el nuevo apartado, complementa o corrige la respuesta encontrada (solo si es preciso y necesario) con este contexto adicional.
-                                No olvides referenciar, en orden, todas las páginas relevantes.
-
-                                Para pólizas con cobertura en México y el extrangero, prioriza la información válida en México.
-
-                                La respuesta debe optimizar la experiencia del usuario con elementos de sintaxis como listas, bullets y salto de línea.
-
-                                El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.'''
+                                Instrucciones:
+                                - Dado el nuevo apartado, complementa o corrige la respuesta previa (solo si es preciso y necesario) con este contexto adicional.
+                                - No debes agregar información que no esté referenciada en la pregunta.
+                                - No olvides referenciar, en orden, todas las páginas relevantes.
+                                - Para pólizas con cobertura en México y el extranjero, prioriza la información válida en México.
+                                - La respuesta debe optimizar la experiencia del usuario con elementos de sintaxis como listas, bullets y salto de línea.
+                                - El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.'''
                                 )
 
     qa_chain = RetrievalQA.from_chain_type(llm = llm,
@@ -119,7 +120,7 @@ def analyze_query(user_question):
                         - True: si el usuario pregunta exclusivamente sobre promociones o seguro de mascotas.
                         - False: en cualquier caso contrario.
 
-                       Es muy importate que identifiques cuando el usuario quiere información sobre un nuevo seguro de mascoras, cualquier pregunta que no esté estrictamente relacionada a un seguro de mascotas debe ser respondida como "False".
+                       Es muy importate que identifiques cuando el usuario quiere información sobre un nuevo seguro de mascotas, cualquier pregunta que no esté estrictamente relacionada a un seguro de mascotas debe ser respondida como "False".
 
                        Ejemplos de preguntas con respuesta "True":
                        1. me puedes compartir información sobre un seguro de mascotas?
