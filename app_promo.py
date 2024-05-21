@@ -30,7 +30,8 @@ def parse_arguments():
     args = parser.parse_args()
     return args.llm
 
-language_model = parse_arguments()
+#language_model = parse_arguments()
+language_model = 'gpt-4o'
 
 # st.set_page_config(page_title="Agente conversacional", page_icon="app/static/logo.jpg")
 # st.markdown(css, unsafe_allow_html=True)
