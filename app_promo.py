@@ -228,7 +228,7 @@ def handle_userinput(user_question, conversation_chain):
     write_chat(st.session_state[history_chat])
 
 def process_documents():
-    if history_chat not in st.session_state:
+    if history_chat in st.session_state:
         st.session_state[history_chat] = []
 
     with st.sidebar:
