@@ -228,6 +228,9 @@ def handle_userinput(user_question, conversation_chain):
     write_chat(st.session_state[history_chat])
 
 def process_documents():
+    if history_chat not in st.session_state:
+        st.session_state[history_chat] = []
+
     with st.sidebar:
         if 'pdf_docs' in st.session_state and st.session_state.pdf_docs:
             with st.spinner("Procesando documentos"):
