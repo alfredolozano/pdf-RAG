@@ -31,7 +31,7 @@ def parse_arguments():
     return args.llm
 
 #language_model = parse_arguments()
-language_model = 'gpt-4o'
+language_model = 'gpt-4'
 
 # st.set_page_config(page_title="Agente conversacional", page_icon="app/static/logo.jpg")
 # st.markdown(css, unsafe_allow_html=True)
@@ -74,10 +74,11 @@ def build_rag_chain(retriever):
     llm = ChatOpenAI(model=language_model, temperature=0)
 
     question_prompt = PromptTemplate(input_variables=['question', 'context_str'],
-                                     template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
-                                     Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta.
+                                     template='''Eres un asistente experto en pólizas de seguros.
+                                     Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta. Utiliza elementos de sintaxis como listas, bullets y salto de línea para optimizar la experiencia de usuario.
                                      La respuesta a la pregunta puede estar contenida en una tabla,
-                                     Mantén la respuesta lo más clara y precisa posible.
+                                     Mantén la respuesta lo más clara y precisa posible para el usuario final.
+                                     Incluye teléfono o algún medio de atención si la consulta lo requiere, especialmente para reportar siniestros.
                                      Apartado: "{context_str}"
 
                                      Pregunta: "{question}"
@@ -87,8 +88,8 @@ def build_rag_chain(retriever):
 
 
     refine_prompt = PromptTemplate(input_variables=['question', 'existing_answer', 'context_str'],
-                                template='''Eres un asistente de inteligencia artificial experto en pólizas de seguros.
-                                Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta.
+                                template='''Eres un asistente experto en pólizas de seguros dedicado a proveer respuestas útiles al usuario.
+                                Dada una pregunta de un usuario y un apartado de su póliza de seguros, debes responder a la pregunta del usuario y mencionar la página que contiene la respuesta. Utiliza elementos de sintaxis como listas, bullets y salto de línea para optimizar la experiencia de usuario.
                                 ---
                                 La pregunta original es: "{question}"
                                 ---
@@ -103,9 +104,9 @@ def build_rag_chain(retriever):
                                 ---
                                 
                                 Instrucciones:
-                                - No debes agregar información que no esté relacionada a la pregunta.
+                                - Incluye teléfono o algún medio de atención si la consulta lo requiere, especialmente para reportar siniestros.
+                                - No debes agregar información que no esté relacionada a la pregunta o meta comentarios sobre las diferentes respuestas como "La respuesta original...".
                                 - Dado el nuevo apartado, complementa o corrige la respuesta previa (solo si es preciso y necesario) con este contexto adicional.
-                                - Utiliza elementos de sintaxis como listas, bullets y salto de línea para optimizar la experiencia de usuario.
                                 - Debes referenciar, en orden, todas las páginas relevantes.
                                 - Para pólizas con cobertura en México y el extranjero, prioriza la información válida en México.
                                 - El usuario no sabe que estas haciendo este paso de refinamiento, por lo tanto, devuelve ÚNICAMENTE una respuesta a la pregunta original, sin comentarios como "la respuesta original es precisa" ni referencias a distintas respuestas.'''
